@@ -1,4 +1,4 @@
-﻿public enum AlgorithmType
+﻿public enum PageReplacementAlgorithmType
 {
     FirstInFirstOut,
     Optimal,

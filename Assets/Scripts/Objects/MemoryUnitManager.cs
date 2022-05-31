@@ -37,18 +37,17 @@ public class MemoryUnitManager : MonoBehaviour
     {
         memoryUnits.Clear();
 
-        foreach (AlgorithmType algorithmType in Enum.GetValues(typeof(AlgorithmType)))
+        foreach (FrameAllocatorType algorithmType in Enum.GetValues(typeof(FrameAllocatorType)))
         {
             MemoryUnit unit = Instantiate(memoryUnitPrefab, transform).GetComponent<MemoryUnit>();
             memoryUnits.Add(unit);
 
-            PageReplacementAlgorithm algorithm = algorithmType switch
+            FrameAllocator algorithm = algorithmType switch
             {
-                AlgorithmType.FirstInFirstOut => new FIFOAlgorithm(),
-                AlgorithmType.Optimal => new OPTAlgorithm(),
-                AlgorithmType.LeastRecentlyUsed => new LRUAlgorithm(),
-                AlgorithmType.SecondChance => new SecondChanceAlgorithm(),
-                AlgorithmType.Random => new RANDAlgorithm(),
+                FrameAllocatorType.Equal => new EqualAllocator(),
+                FrameAllocatorType.Proportional => new ProportionalAllocator(),
+                FrameAllocatorType.PageFaultBased => new PageFaultBasedAllocator(),
+                FrameAllocatorType.Zoning => new ZoningAllocator(),
                 _ => throw new NotImplementedException(),
             };
 
@@ -70,20 +69,20 @@ public class MemoryUnitManager : MonoBehaviour
         }
     }
 
-    public void RunSimulations(Queue<Process> sequence)
+    public void RunSimulations(Queue<Request> sequence)
     {
         unitsLeft = new HashSet<MemoryUnit>(memoryUnits);
 
         foreach (MemoryUnit unit in memoryUnits)
         {
-            unit.Simulate(new Queue<Process>(sequence));
+            unit.Simulate(new Queue<Request>(sequence));
         }
     }
 
 
     void OnUnitSimulationFinished(MemoryUnit unit)
     {
-        Debug.Log($"{unit.algorithmType} finished");
+        Debug.Log($"{unit.frameAllocationAlgorithmType} finished");
         unitsLeft.Remove(unit);
     }
 

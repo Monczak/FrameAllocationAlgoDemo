@@ -489,7 +489,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6fd2efce77c49c47a79d00e6c85c6d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  algorithmType: 0
+  pageReplacementAlgorithmType: 2
+  frameAllocationAlgorithmType: 0
   base: {fileID: 6224043823866934602}
   pagesTransform: {fileID: 6224043824000782465}
   algorithmText: {fileID: 6224043824411729804}
@@ -509,7 +510,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pagesRenderer: {fileID: 6224043825394160869}
-  nullPageColor: {r: 0.1792453, g: 0.1792453, b: 0.1792453, a: 1}
+  maxTextureSize: 2048
 --- !u!1 &6224043824000782470
 GameObject:
   m_ObjectHideFlags: 0
@@ -704,7 +705,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: FIFO
+  m_text: Very Long Algorithm Name
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: cc2f22194351c7b46b2e9a3798857c6f, type: 2}
   m_sharedMaterial: {fileID: 3520577728394360788, guid: cc2f22194351c7b46b2e9a3798857c6f, type: 2}
@@ -731,12 +732,12 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 5
+  m_fontSize: 3.05
   m_fontSizeBase: 5
   m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_enableAutoSizing: 1
+  m_fontSizeMin: 3
+  m_fontSizeMax: 5
   m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 1024

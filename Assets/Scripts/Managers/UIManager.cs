@@ -1,6 +1,5 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+﻿using TMPro;
+using UnityEngine;
 
 public class UIManager : MonoBehaviour
 {
@@ -16,7 +15,6 @@ public class UIManager : MonoBehaviour
 
     [Header("HUD")]
     public TMP_Text currentTimeText;
-    public Image currentColorImage;
 
     private Controls controls;
     private bool step;
@@ -60,8 +58,7 @@ public class UIManager : MonoBehaviour
 
     private void UpdateHUD()
     {
-        currentTimeText.text = $"{(int)SimulationManager.Instance.currentTime} / {SimulationManager.Instance.simulationSettings.sequenceLength}";
-        currentColorImage.color = MemoryPageRenderer.GetPageColor(new MemoryPage { index = (int)SimulationManager.Instance.currentTime });
+        currentTimeText.text = $"{(int)SimulationManager.Instance.currentTime} / {SimulationManager.Instance.simulationDuration}";
     }
 
     public void OnMenuButtonPressed()

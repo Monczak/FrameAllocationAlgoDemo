@@ -7,8 +7,11 @@ using UnityEngine.UI;
 
 public class MemoryUnit : MonoBehaviour
 {
-    public PageReplacementAlgorithm algorithm;
-    public AlgorithmType algorithmType;
+    public PageReplacementAlgorithm pageReplacementAlgorithm;
+    public PageReplacementAlgorithmType pageReplacementAlgorithmType;
+
+    public FrameAllocator frameAllocationAlgorithm;
+    public FrameAllocatorType frameAllocationAlgorithmType;
 
     private MemoryUnitState[] states;
 
@@ -66,12 +69,15 @@ public class MemoryUnit : MonoBehaviour
         pageFaultsText.text = pageFaults.ToString();
     }
 
-    public void SetProperties(PageReplacementAlgorithm algorithm, Vector3 size)
+    public void SetProperties(FrameAllocator frameAllocationAlgorithm, Vector3 size)
     {
-        this.algorithm = algorithm;
+        this.frameAllocationAlgorithm = frameAllocationAlgorithm;
+        pageReplacementAlgorithm = new LRUAlgorithm(frameAllocationAlgorithm);
 
-        algorithmType = algorithm.AlgorithmType;
-        algorithmText.text = algorithm.AlgorithmName;
+        pageReplacementAlgorithmType = pageReplacementAlgorithm.AlgorithmType;
+        frameAllocationAlgorithmType = frameAllocationAlgorithm == null ? FrameAllocatorType.Equal : frameAllocationAlgorithm.AlgorithmType;
+
+        algorithmText.text = frameAllocationAlgorithm == null ? "A" : frameAllocationAlgorithm.AlgorithmName;
 
         @base.localScale = size;
         pagesTransform.localScale = size - new Vector3(0.5f, 0, 0.5f);
@@ -92,14 +98,14 @@ public class MemoryUnit : MonoBehaviour
             pages[i] = MemoryPage.NullPage;
     }
 
-    public void Simulate(Queue<Process> processes)
+    public void Simulate(Queue<Request> requests)
     {
         cachedSettings = SimulationManager.Instance.simulationSettings;
 
         ClearPages();
         pageRenderer.CreateTexture(pages.Length);
 
-        states = new MemoryUnitState[processes.Count + 1];
+        states = new MemoryUnitState[requests.Count + 1];
         states[0] = new MemoryUnitState
         {
             Pages = new MemoryPage[cachedSettings.memorySize],
@@ -113,9 +119,11 @@ public class MemoryUnit : MonoBehaviour
         cancellationTokenSource = new CancellationTokenSource();
         CancellationToken cancellationToken = cancellationTokenSource.Token;
 
+        List<Process> processes = new List<Process>(SimulationManager.Instance.processes);
+
         Task.Factory.StartNew(() =>
         {
-            IEnumerator<MemoryUnitState> stateGenerator = algorithm.Run(processes);
+            IEnumerator<MemoryUnitState> stateGenerator = pageReplacementAlgorithm.Run(requests, cachedSettings);
             statesComputed = 1;
             while (stateGenerator.MoveNext())
             {
@@ -126,10 +134,24 @@ public class MemoryUnit : MonoBehaviour
                     break;
                 }
             }
-        }).ContinueWith(_ =>
+        }).ContinueWith(t =>
         {
-            OnSimulationFinished?.Invoke(this);
+            OnSimulationDone(t);
         });
+    }
+
+    private void OnSimulationDone(Task task)
+    {
+        if (task.IsFaulted)
+        {
+            string message = $"{frameAllocationAlgorithm.AlgorithmName} failed: ";
+            foreach (var e in task.Exception?.InnerExceptions)
+            {
+                message += $"{e.Message}\n{e.StackTrace}\n";
+            }
+            Debug.LogError(message);
+        }
+        OnSimulationFinished?.Invoke(this);
     }
 
     public delegate void OnSimulationFinishedDelegate(MemoryUnit unit);

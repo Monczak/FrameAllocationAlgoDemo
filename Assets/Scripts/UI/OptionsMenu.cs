@@ -7,8 +7,9 @@ public class OptionsMenu : MonoBehaviour
     public TMP_InputField memorySizeInput;
     public TMP_InputField processCountInput;
     public TMP_InputField sequenceLengthInput;
-    public MultiSelector sequencePatternInput;
-    public TMP_InputField shuffleRatioInput;
+    public TMP_InputField minProcessSizeInput;
+    public TMP_InputField maxProcessSizeInput;
+    public TMP_InputField zoningLookbackInput;
     public TMP_InputField simulationSpeedInput;
 
     public TogglableButtonText applyButton;
@@ -31,21 +32,19 @@ public class OptionsMenu : MonoBehaviour
             { memorySizeInput, true },
             { processCountInput, true },
             { sequenceLengthInput, true },
-            { shuffleRatioInput, true },
+            { minProcessSizeInput, true },
+            { maxProcessSizeInput, true },
+            { zoningLookbackInput, true },
             { simulationSpeedInput, true }
         };
 
         memorySizeInput.onValueChanged.AddListener(s => OnMemorySizeUpdate(s));
         processCountInput.onValueChanged.AddListener(s => OnProcessCountUpdate(s));
         sequenceLengthInput.onValueChanged.AddListener(s => OnSequenceLengthUpdate(s));
-        sequencePatternInput.OnChanged += OnSequencePatternChanged;
-        shuffleRatioInput.onValueChanged.AddListener(s => OnShuffleRatioUpdate(s));
+        minProcessSizeInput.onValueChanged.AddListener(s => OnMinProcessSizeUpdate(s));
+        maxProcessSizeInput.onValueChanged.AddListener(s => OnMaxProcessSizeUpdate(s));
+        zoningLookbackInput.onValueChanged.AddListener(s => OnZoningLookbackUpdate(s));
         simulationSpeedInput.onValueChanged.AddListener(s => OnSimulationSpeedUpdate(s));
-    }
-
-    private void OnSequencePatternChanged()
-    {
-        currentSettings.generationPattern = (SequenceGenerationPattern)sequencePatternInput.Selected;
     }
 
     private void Start()
@@ -71,8 +70,9 @@ public class OptionsMenu : MonoBehaviour
         memorySizeInput.text = currentSettings.memorySize.ToString();
         processCountInput.text = currentSettings.processCount.ToString();
         sequenceLengthInput.text = currentSettings.sequenceLength.ToString();
-        sequencePatternInput.Selected = (int)currentSettings.generationPattern;
-        shuffleRatioInput.text = currentSettings.shuffleRatio.ToString();
+        minProcessSizeInput.text = currentSettings.minProcessSize.ToString();
+        maxProcessSizeInput.text = currentSettings.maxProcessSize.ToString();
+        zoningLookbackInput.text = currentSettings.zoningLookback.ToString();
         simulationSpeedInput.text = currentSettings.simulationSpeed.ToString();
     }
 
@@ -81,10 +81,11 @@ public class OptionsMenu : MonoBehaviour
         bool newSequence =
             currentSettings.processCount != SimulationManager.Instance.simulationSettings.processCount ||
             currentSettings.sequenceLength != SimulationManager.Instance.simulationSettings.sequenceLength ||
-            currentSettings.generationPattern != SimulationManager.Instance.simulationSettings.generationPattern ||
-            currentSettings.shuffleRatio != SimulationManager.Instance.simulationSettings.shuffleRatio;
+            currentSettings.minProcessSize != SimulationManager.Instance.simulationSettings.minProcessSize ||
+            currentSettings.maxProcessSize != SimulationManager.Instance.simulationSettings.maxProcessSize;
         bool rerunSimulation = newSequence ||
-            currentSettings.memorySize != SimulationManager.Instance.simulationSettings.memorySize;
+            currentSettings.memorySize != SimulationManager.Instance.simulationSettings.memorySize ||
+            currentSettings.zoningLookback != SimulationManager.Instance.simulationSettings.zoningLookback;
 
         SimulationManager.Instance.SetSimulationSettings(currentSettings);
 
@@ -187,27 +188,70 @@ public class OptionsMenu : MonoBehaviour
         }
     }
 
-    private void OnShuffleRatioUpdate(string input)
+    private void OnMinProcessSizeUpdate(string input, bool sub = false)
     {
-        if (float.TryParse(input, out float value))
+        if (int.TryParse(input, out int minSize))
         {
-            if (value < 0 || value > 1)
-                MarkInvalid(shuffleRatioInput);
+            if (minSize < 0 || minSize > currentSettings.maxProcessSize)
+                MarkInvalid(minProcessSizeInput);
             else
             {
-                MarkNormal(shuffleRatioInput);
-                currentSettings.shuffleRatio = value;
+                MarkNormal(minProcessSizeInput);
+                currentSettings.minProcessSize = minSize;
             }
         }
         else
         {
-            MarkInvalid(shuffleRatioInput);
+            MarkInvalid(minProcessSizeInput);
+        }
+
+        if (!sub)
+            OnMaxProcessSizeUpdate(maxProcessSizeInput.text, true);
+    }
+
+    private void OnMaxProcessSizeUpdate(string input, bool sub = false)
+    {
+        if (int.TryParse(input, out int maxSize))
+        {
+            if (maxSize < 0 || maxSize < currentSettings.maxProcessSize)
+                MarkInvalid(maxProcessSizeInput);
+            else
+            {
+                MarkNormal(maxProcessSizeInput);
+                currentSettings.maxProcessSize = maxSize;
+            }
+        }
+        else
+        {
+            MarkInvalid(maxProcessSizeInput);
+        }
+
+        if (!sub)
+            OnMinProcessSizeUpdate(minProcessSizeInput.text, true);
+    }
+
+    private void OnZoningLookbackUpdate(string input)
+    {
+        if (int.TryParse(input, out int value))
+        {
+            if (value < 0)
+                MarkInvalid(zoningLookbackInput);
+            else
+            {
+                MarkNormal(zoningLookbackInput);
+                currentSettings.zoningLookback = value;
+            }
+
+        }
+        else
+        {
+            MarkInvalid(zoningLookbackInput);
         }
     }
-    
+
     private void OnSimulationSpeedUpdate(string input)
     {
-        if (float.TryParse(input, out float value))
+        if (int.TryParse(input, out int value))
         {
             if (value < minSimulationSpeed || value > maxSimulationSpeed)
                 MarkInvalid(simulationSpeedInput);

@@ -3,37 +3,41 @@ using Random = UnityEngine.Random;
 
 public class SequenceGenerator
 {
-    public static Queue<Process> GenerateSequence()
+    public static (Queue<Request>, List<Process>) GenerateSequence()
     {
-        // TODO: Enable generation pattern selection
-        ISequenceGenerationPattern generationPattern = SimulationManager.Instance.simulationSettings.generationPattern switch
+        Queue<Request> queue = new Queue<Request>();
+        List<Process> processes = new List<Process>();
+
+        for (int i = 0; i < SimulationManager.Instance.simulationSettings.processCount; i++)
         {
-            SequenceGenerationPattern.Random => new RandomPattern(),
-            SequenceGenerationPattern.Simple => new SimplePattern(),
-            SequenceGenerationPattern.Triangle => new TrianglePattern(),
-            SequenceGenerationPattern.BackAndForth1x => new BackAndForthPattern(SimulationManager.Instance.simulationSettings.memorySize),
-            SequenceGenerationPattern.BackAndForth2x => new BackAndForthPattern(SimulationManager.Instance.simulationSettings.memorySize * 2),
-            _ => throw new System.NotImplementedException(),
-        };
-
-        List<int> indexes = new List<int>();
-        for (int i = 0; i < SimulationManager.Instance.simulationSettings.sequenceLength; i++)
-            indexes.Add(generationPattern.GetIndex(i));
-
-        Shuffle(indexes, SimulationManager.Instance.simulationSettings.shuffleRatio);
-
-        Queue<Process> queue = new Queue<Process>();    
-
-        for (int i = 0; i < SimulationManager.Instance.simulationSettings.sequenceLength; i++)
-        {
-            queue.Enqueue(new Process
+            processes.Add(new Process
             {
-                id = indexes[i],
-                index = i
+                id = i,
+                index = i,
+                size = Random.Range(SimulationManager.Instance.simulationSettings.minProcessSize, SimulationManager.Instance.simulationSettings.maxProcessSize),
             });
         }
 
-        return queue;
+        int n = 0;
+        while (n < SimulationManager.Instance.simulationSettings.sequenceLength)
+        {
+            Process process = processes[Random.Range(0, processes.Count)];
+            int requests = Random.Range(0, process.size);
+            for (int i = 0; i < requests; i++)
+            {
+                queue.Enqueue(new Request
+                {
+                    process = process,
+                    pageId = Random.Range(0, process.size)
+                });
+                n++;
+
+                if (n >= SimulationManager.Instance.simulationSettings.sequenceLength)
+                    break;
+            }
+        }
+
+        return (queue, processes);
     }
 
     private static void Shuffle(List<int> list, float shuffleRatio)

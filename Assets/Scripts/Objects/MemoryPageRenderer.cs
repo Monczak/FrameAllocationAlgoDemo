@@ -58,5 +58,8 @@ public class MemoryPageRenderer : MonoBehaviour
         };
     }
 
-    public static Color GetPageColor(MemoryPage page) => page == MemoryPage.NullPage ? nullPageColor : Color.HSVToRGB((float)page.index / SimulationManager.Instance.simulationSettings.sequenceLength, 0.85f, 0.95f);
+    public static Color GetPageColor(MemoryPage page) => page == MemoryPage.NullPage ? nullPageColor : Color.HSVToRGB(
+        (float)page.processId / SimulationManager.Instance.simulationSettings.processCount,
+        Mathf.Lerp(0.65f, 0.85f, page.process == null ? 1 : (page.process.size == 1 ? 1 : (float)page.pageId / (page.process.size - 1))),
+        0.95f);
 }

@@ -1,17 +1,24 @@
 public struct MemoryPage
 {
     public int processId;
+    public int pageId;
     public int index;
+
+    public Process process;
 
     public static MemoryPage NullPage => new MemoryPage
     {
-        processId = -1
+        processId = -1,
+        pageId = -1,
+        process = null
     };
 
-    public MemoryPage(Process process)
+    public MemoryPage(Process process, int id)
     {
         processId = process.id;
+        pageId = id;
         index = process.index;
+        this.process = process;
     }
 
     public override bool Equals(object obj)
@@ -21,7 +28,7 @@ public struct MemoryPage
             return false;
         }
 
-        return processId == ((MemoryPage)obj).processId;
+        return processId == ((MemoryPage)obj).processId && pageId == ((MemoryPage)obj).pageId;
     }
 
     public override int GetHashCode()

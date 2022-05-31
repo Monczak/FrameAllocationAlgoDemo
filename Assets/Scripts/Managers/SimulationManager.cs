@@ -15,7 +15,8 @@ public class SimulationManager : MonoBehaviour
 
     [Header("Simulation Logic")]
     public MemoryUnitManager memoryUnitManager;
-    private Queue<Process> currentSequence;
+    private Queue<Request> currentSequence;
+    public List<Process> processes;
 
     [Header("Comfort Features")]
     public CameraMovement cameraMovement;
@@ -48,7 +49,7 @@ public class SimulationManager : MonoBehaviour
 
     public void GenerateNewSequence()
     {
-        currentSequence = SequenceGenerator.GenerateSequence();
+        (currentSequence, processes) = SequenceGenerator.GenerateSequence();
         simulationDuration = currentSequence.Count;
     }
 
@@ -66,11 +67,12 @@ public class SimulationManager : MonoBehaviour
     {
         simulationSettings = new SimulationSettings
         {
-            memorySize = 10,
-            processCount = 50,
-            sequenceLength = 150,
-            generationPattern = SequenceGenerationPattern.Random,
-            shuffleRatio = 0f,
+            memorySize = 20,
+            processCount = 10,
+            sequenceLength = 50,
+            minProcessSize = 1,
+            maxProcessSize = 10,
+            zoningLookback = 10,
             simulationSpeed = 1f,
         };
     }
