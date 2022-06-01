@@ -10,8 +10,8 @@ public class MemoryUnit : MonoBehaviour
     public PageReplacementAlgorithm pageReplacementAlgorithm;
     public PageReplacementAlgorithmType pageReplacementAlgorithmType;
 
-    public FrameAllocator frameAllocationAlgorithm;
-    public FrameAllocatorType frameAllocationAlgorithmType;
+    public FrameAllocator frameAllocator;
+    public FrameAllocatorType frameAllocatorType;
 
     private MemoryUnitState[] states;
 
@@ -69,15 +69,15 @@ public class MemoryUnit : MonoBehaviour
         pageFaultsText.text = pageFaults.ToString();
     }
 
-    public void SetProperties(FrameAllocator frameAllocationAlgorithm, Vector3 size)
+    public void SetProperties(FrameAllocator frameAllocator, Vector3 size)
     {
-        this.frameAllocationAlgorithm = frameAllocationAlgorithm;
-        pageReplacementAlgorithm = new LRUAlgorithm(frameAllocationAlgorithm);
+        this.frameAllocator = frameAllocator;
+        pageReplacementAlgorithm = new LRUAlgorithm(frameAllocator);
 
         pageReplacementAlgorithmType = pageReplacementAlgorithm.AlgorithmType;
-        frameAllocationAlgorithmType = frameAllocationAlgorithm == null ? FrameAllocatorType.Equal : frameAllocationAlgorithm.AlgorithmType;
+        frameAllocatorType = frameAllocator == null ? FrameAllocatorType.Equal : frameAllocator.AlgorithmType;
 
-        algorithmText.text = frameAllocationAlgorithm == null ? "A" : frameAllocationAlgorithm.AlgorithmName;
+        algorithmText.text = frameAllocator == null ? "A" : frameAllocator.AlgorithmName;
 
         @base.localScale = size;
         pagesTransform.localScale = size - new Vector3(0.5f, 0, 0.5f);
@@ -144,7 +144,7 @@ public class MemoryUnit : MonoBehaviour
     {
         if (task.IsFaulted)
         {
-            string message = $"{frameAllocationAlgorithm.AlgorithmName} failed: ";
+            string message = $"{frameAllocator.AlgorithmName} failed: ";
             foreach (var e in task.Exception?.InnerExceptions)
             {
                 message += $"{e.Message}\n{e.StackTrace}\n";

@@ -11,6 +11,7 @@ public abstract class PageReplacementAlgorithm
     protected MemoryUnitState currentState;
     protected Dictionary<Process, Dictionary<int, int>> pageLocations;
     private Dictionary<Process, int> framesUsed;
+    private SortedDictionary<int, bool> framesOccupied; 
 
     protected int pagesOccupied;
 
@@ -38,9 +39,11 @@ public abstract class PageReplacementAlgorithm
             }
         }
 
+        framesOccupied = new SortedDictionary<int, bool>();
         for (int i = 0; i < currentState.MemorySize; i++)
         {
             currentState.Pages[i] = MemoryPage.NullPage;
+            framesOccupied.Add(i, false);
         }
 
         framesUsed = new Dictionary<Process, int>();
@@ -119,8 +122,29 @@ public abstract class PageReplacementAlgorithm
         }
     }
 
+    private int FindFreePage()
+    {
+        foreach (KeyValuePair<int, bool> pair in framesOccupied)
+        {
+            if (!pair.Value)
+                return pair.Key;
+        }
+        return -1;
+    }
+    
+    private void FreePage(int page)
+    {
+        framesOccupied[page] = false;
+    }
+
+    private void OccupyPage(int page)
+    {
+        framesOccupied[page] = true;
+    }
+
     private void ReplacePage(int pageToReplace, Request request)
     {
+        // FreePage(pageLocations[request.process][request.pageId]);
         SetPageLocation(request.process, currentState.Pages[pageToReplace].pageId, MemoryPage.NullPage.pageId);
 
         currentState.Pages[pageToReplace].processId = request.process.id;
@@ -128,6 +152,7 @@ public abstract class PageReplacementAlgorithm
         currentState.Pages[pageToReplace].index = request.process.index;
         currentState.Pages[pageToReplace].process = request.process;
 
+        // OccupyPage(pageToReplace);
         SetPageLocation(request.process, request.pageId, pageToReplace);
     }
 

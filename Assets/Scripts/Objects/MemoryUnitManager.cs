@@ -37,12 +37,12 @@ public class MemoryUnitManager : MonoBehaviour
     {
         memoryUnits.Clear();
 
-        foreach (FrameAllocatorType algorithmType in Enum.GetValues(typeof(FrameAllocatorType)))
+        foreach (FrameAllocatorType allocatorType in Enum.GetValues(typeof(FrameAllocatorType)))
         {
             MemoryUnit unit = Instantiate(memoryUnitPrefab, transform).GetComponent<MemoryUnit>();
             memoryUnits.Add(unit);
 
-            FrameAllocator algorithm = algorithmType switch
+            FrameAllocator allocator = allocatorType switch
             {
                 FrameAllocatorType.Equal => new EqualAllocator(),
                 FrameAllocatorType.Proportional => new ProportionalAllocator(),
@@ -51,7 +51,7 @@ public class MemoryUnitManager : MonoBehaviour
                 _ => throw new NotImplementedException(),
             };
 
-            unit.SetProperties(algorithm, unitSize);
+            unit.SetProperties(allocator, unitSize);
 
             unit.OnSimulationFinished += OnUnitSimulationFinished;
         }
@@ -82,7 +82,7 @@ public class MemoryUnitManager : MonoBehaviour
 
     void OnUnitSimulationFinished(MemoryUnit unit)
     {
-        Debug.Log($"{unit.frameAllocationAlgorithmType} finished");
+        Debug.Log($"{unit.frameAllocatorType} finished");
         unitsLeft.Remove(unit);
     }
 

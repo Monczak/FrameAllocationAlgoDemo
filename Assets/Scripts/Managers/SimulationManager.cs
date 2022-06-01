@@ -67,12 +67,12 @@ public class SimulationManager : MonoBehaviour
     {
         simulationSettings = new SimulationSettings
         {
-            memorySize = 20,
+            memorySize = 100,
             processCount = 10,
-            sequenceLength = 50,
+            sequenceLength = 500,
             minProcessSize = 1,
-            maxProcessSize = 10,
-            zoningLookback = 10,
+            maxProcessSize = 50,
+            zoningLookback = 20,
             simulationSpeed = 1f,
         };
     }
