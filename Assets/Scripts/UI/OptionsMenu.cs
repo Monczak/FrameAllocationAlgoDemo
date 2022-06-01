@@ -213,7 +213,7 @@ public class OptionsMenu : MonoBehaviour
     {
         if (int.TryParse(input, out int maxSize))
         {
-            if (maxSize < 0 || maxSize < currentSettings.maxProcessSize)
+            if (maxSize < 0 || maxSize < currentSettings.minProcessSize)
                 MarkInvalid(maxProcessSizeInput);
             else
             {
